@@ -1,8 +1,12 @@
-name: Build and Upload Release Artifact
+name: Build and Publish Maven Artifact
 
 on:
   release:
-    types: [created] # Se ejecuta cuando se crea una nueva release
+    types: [published]
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   build:
@@ -13,25 +17,58 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Get project version
-        run: echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+          cache: 'maven'
 
       - name: Build with Maven
         run: mvn clean package
 
-      - name: Upload Artifact to GitHub Actions
-        uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: SDAICore-${{ env.VERSION }}
+          name: maven-artifact
           path: target/*.jar
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Configure Maven settings
+        run: |
+          cat > $HOME/.m2/settings.xml <<EOL
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>\${{ secrets.GITHUB_ACTOR }}</username>
+                <password>\${{ secrets.GITHUB_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOL
+
+      - name: Publish to GitHub Packages
+        run: mvn deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload to GitHub Release
         run: |
           gh release upload ${{ github.event.release.tag_name }} target/*.jar
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
