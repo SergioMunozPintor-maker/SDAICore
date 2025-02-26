@@ -3,6 +3,7 @@ name: Deploy Maven Package
 on:
   release: 
     types: [published]  # Se ejecuta cuando una release es publicada    
+    workflow_dispatch:
 
 jobs:
   publish:
