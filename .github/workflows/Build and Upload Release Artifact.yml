@@ -30,9 +30,8 @@ jobs:
           name: SDAICore-${{ env.VERSION }}
           path: target/*.jar
 
-      - name: Upload Artifact to GitHub Release
-        uses: softprops/action-gh-release@v4
-        with:
-          files: target/*.jar
+      - name: Upload to GitHub Release
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} target/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
