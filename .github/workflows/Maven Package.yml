@@ -1,9 +1,8 @@
 name: Deploy Maven Package
 
 on:
-  push:
-    branches:
-      - main  # Cambia según tu rama principal
+  release: 
+    types: [published]  # Se ejecuta cuando una release es publicada    
 
 jobs:
   publish:
