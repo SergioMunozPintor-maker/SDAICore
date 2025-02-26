@@ -1,14 +1,11 @@
-# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
-
 name: Maven Package
 
 on:
   release:
-    types: [created]
+    types: [created] # Se ejecuta cuando se crea una nueva release
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,21 +17,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          server-id: github
-          settings-path: ${{ github.workspace }}
-
-      - name: Configure Maven settings.xml
-        run: |
-          mkdir -p ~/.m2
-          echo '<settings>
-          <servers>
-            <server>
-              <id>github</id>
-              <username>${{ github.actor }}</username>
-              <password>${{ secrets.GITHUB_TOKEN }}</password>
-            </server>
-          </servers>
-          </settings>' > ~/.m2/settings.xml
 
       - name: Get project version
         run: echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
@@ -42,7 +24,15 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      - name: Publish to GitHub Packages
-        run: mvn deploy
+      - name: Upload Artifact to GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-app-${{ env.VERSION }}
+          path: target/*.jar
+
+      - name: Upload Artifact to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
