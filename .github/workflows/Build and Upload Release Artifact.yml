@@ -65,10 +65,10 @@ jobs:
       - name: Publish to GitHub Packages
         run: mvn deploy
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Upload to GitHub Release
         run: |
           gh release upload ${{ github.event.release.tag_name }} target/*.jar
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
