@@ -27,7 +27,7 @@ jobs:
       - name: Upload Artifact to GitHub Actions
         uses: actions/upload-artifact@v4
         with:
-          name: my-app-${{ env.VERSION }}
+          name: SDAICore-${{ env.VERSION }}
           path: target/*.jar
 
       - name: Upload Artifact to GitHub Release
