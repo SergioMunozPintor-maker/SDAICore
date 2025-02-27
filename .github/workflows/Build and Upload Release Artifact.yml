@@ -36,3 +36,14 @@ jobs:
       with:
         name: SDAICore-${{ env.VERSION }}
         path: target/*.jar
+
+    - name: Create GitHub release
+      uses: actions/create-release@v4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.VERSION }}
+        release_name: Release ${{ env.VERSION }}
+        draft: false
+        prerelease: false
+        files: target/*.jar
