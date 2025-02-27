@@ -38,12 +38,7 @@ jobs:
         path: target/*.jar
 
     - name: Create GitHub release
-      uses: actions/create-release@v4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
-        draft: false
-        prerelease: false
-        files: target/*.jar
+        run: gh release create ${{ env.VERSION }} target/*.jar --title "Release ${{ env.VERSION }}" --notes "Release notes"
+
